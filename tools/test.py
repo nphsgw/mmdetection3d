@@ -128,6 +128,9 @@ def parse_args():
 
 
 def main():
+    """推論実行"""
+
+    # パーサーで引数をパラメータ化
     args = parse_args()
 
     assert args.out or args.eval or args.format_only or args.show \
@@ -142,6 +145,7 @@ def main():
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
+    # configパラメータの形式を整える。
     cfg = Config.fromfile(args.config)
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
@@ -200,15 +204,19 @@ def main():
         set_random_seed(args.seed, deterministic=args.deterministic)
 
     # build the dataloader
+    # データセットをビルドして、ローダーに格納
     dataset = build_dataset(cfg.data.test)
     data_loader = build_dataloader(dataset, **test_loader_cfg)
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
+    # モデルをビルド
     model = build_model(cfg.model, test_cfg=cfg.get('test_cfg'))
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
+        # fp16に対応している場合はfp16バージョンの処理でラップする。
         wrap_fp16_model(model)
+    # checkpoint(学習済み)のロード
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
     if args.fuse_conv_bn:
         model = fuse_conv_bn(model)
@@ -226,9 +234,11 @@ def main():
         model.PALETTE = dataset.PALETTE
 
     if not distributed:
+        # single GPUの場合
         model = MMDataParallel(model, device_ids=cfg.gpu_ids)
         outputs = single_gpu_test(model, data_loader, args.show, args.show_dir)
     else:
+        # マルチGPUの場合
         model = MMDistributedDataParallel(
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
