@@ -25,7 +25,7 @@ RUN pip install -e .
 # rocker --nvidia --x11 --privileged --home mmdet3d
 # docker runで起動する場合
 # xhost local:root
-# docker run -it --rm --gpus 'all,"capabilities=compute,utility,graphics"' -v /tmp/.X11-unix:/tmp/.X11-unix -v/home:/home -e DISPLAY mmdet3d bash
+# docker run -it --rm --gpus 'all,"capabilities=compute,utility,graphics"' -v /tmp/.X11-unix:/tmp/.X11-unix -v /home:/home -e DISPLAY mmdet3d bash
 # コンテナー内ででもプログラムを起動する
 # python demo/pcd_demo.py demo/data/kitti/kitti_000008.bin configs/second/hv_second_secfpn_6x8_80e_kitti-3d-car.py checkpoints/hv_second_secfpn_6x8_80e_kitti-3d-car_20200620_230238-393f000c.pth --show
 # cd data

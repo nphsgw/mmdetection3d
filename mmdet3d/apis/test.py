@@ -40,6 +40,15 @@ def single_gpu_test(model, data_loader, show=False, out_dir=None, show_score_thr
             models_3d = (Base3DDetector, Base3DSegmentor, SingleStageMono3DDetector)
             if isinstance(model.module, models_3d):
                 # ここのブロックはMMdetection3Dの可視化APIを使う。
+                # 例. CenterPointの場合、Base3DDetectorクラスを継承したクラスのためここでTrue判定になる。
+                # しかし、ここにくるとエラーになるなぜ？
+                """
+                ■確定
+                CenterPointはMVXTwoStageDetectorクラスを継承しており、このクラスで定義されたshow_results()が呼び出される。
+                しかし、このクラスのshow_results()はshow, score_thrを引数として取らないためエラーとなる。
+                この問題が起きるのはMVXTwoStageDetectorクラスを使うもののみ。
+                
+                """
                 model.module.show_results(
                     data, result, out_dir=out_dir, show=show, score_thr=show_score_thr
                 )
